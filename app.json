@@ -39,6 +39,11 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "expo": {
+      "web": {
+        "bundler": "metro"
+      }
     }
   }
 }
