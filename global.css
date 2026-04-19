@@ -26,6 +26,7 @@
     --color-background: var(--color-primary-fill);
     --color-card: var(--color-surface-fill);
     --color-muted: var(--color-container-fill);
+    --color-muted-foreground: var(--color-stroke);
     --color-primary: var(--color-text);
     --color-accent: var(--color-primary-orange);
     --color-border: var(--color-stroke);
@@ -53,17 +54,17 @@
     --spacing-24: 96px;
     --spacing-30: 120px;
 
-    --font-sans: sans-regular;
+    /* --font-sans: sans-regular;
     --font-sans-light: sans-light;
     --font-sans-medium: sans-medium;
     --font-sans-semibold: sans-semibold;
     --font-sans-bold: sans-bold;
-    --font-sans-extrabold: sans-extrabold;
+    --font-sans-extrabold: sans-extrabold; */
 }
 
 .dark {
     --color-primary-fill: #111111;
-    --color-surface-fill: #22201F;
+    --color-surface-fill: #2f2c2b;
     --color-container-fill: #363636;
     --color-text: #FFFFFF;
     --color-stroke: #a1a1a19e;
@@ -74,6 +75,7 @@
     --color-background: var(--color-primary-fill);
     --color-card: var(--color-surface-fill);
     --color-muted: var(--color-container-fill);
+    --color-muted-foreground: var(--color-stroke);
     --color-primary: var(--color-text);
     --color-accent: var(--color-primary-orange);
     --color-border: var(--color-stroke);

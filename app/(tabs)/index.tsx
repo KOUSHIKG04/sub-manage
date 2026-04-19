@@ -7,9 +7,10 @@ export default function Home() {
   const { theme } = useTheme();
   return (
     <Screen>
-      <Text className="text-xl font-bold" style={{ color: theme.text }}>
+       <View className="flex-1 items-center justify-center">
+      <Text className="text-xl font-bold text-primary" >
         Welcome to Nativewind!
-      </Text>
+      </Text></View>
     </Screen>
   );
 }
