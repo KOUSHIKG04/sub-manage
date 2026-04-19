@@ -1,66 +1,82 @@
+import { icons } from "@/src/constants/icon";
 import { useTheme } from "@/src/theme/useTheme";
-import { Ionicons } from "@expo/vector-icons";
 import { Tabs } from "expo-router";
+import { Image,TouchableOpacity, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function TabLayout() {
-  const { theme, isDark } = useTheme();
+  const { theme } = useTheme();
+  const insets = useSafeAreaInsets();
+  const TABS = [
+    {
+      name: "index",
+      title: "Home",
+      icon: icons.home,
+    },
+    {
+      name: "subscription",
+      title: "Subscription",
+      icon: icons.wallet,
+    },
+    {
+      name: "insights",
+      title: "Insights",
+      icon: icons.activity,
+    },
+    {
+      name: "settings",
+      title: "Settings",
+      icon: icons.setting,
+    },
+  ];
 
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
+        tabBarShowLabel: false,
         tabBarStyle: {
           backgroundColor: theme.card,
-          borderTopWidth: 0.2,
-          borderTopColor: theme.border,
-          height: 90,
-          paddingTop: 8,
-        },
-        tabBarLabelStyle: {
-          fontSize: 14,
-          paddingBottom: 8,
-          fontFamily: "Poppins-Bold",
+          position: "absolute",
+          // bottom: insets.bottom > 0 ? insets.bottom : 20,
+          height: 85,
+          borderTopWidth: 0,
+          paddingTop: 10,
+          paddingBottom: 12,
         },
         tabBarActiveTintColor: theme.accent,
         tabBarInactiveTintColor: theme.border,
       }}
     >
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: "Home",
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="home" size={size} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="subscription"
-        options={{
-          title: "Subscription",
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="card-outline" size={size} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="insights"
-        options={{
-          title: "Insights",
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="bar-chart-outline" size={size} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="settings"
-        options={{
-          title: "Settings",
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="settings" size={size} color={color} />
-          ),
-        }}
-      />
+      {TABS.map((tab) => (
+        <Tabs.Screen
+          key={tab.name}
+          name={tab.name}
+          options={{
+            title: tab.title,
+            tabBarIcon: ({ color, focused }) => (
+              <View
+                style={{
+                  // backgroundColor: focused
+                  //   ? theme.accent + "15"
+                  //   : "transparent",
+                  // borderRadius: 20,
+                  padding: 16,
+                  marginTop: 4,
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <Image
+                  source={tab.icon}
+                  style={{ width: 24, height: 24, tintColor: color }}
+                  resizeMode="contain"
+                />
+              </View>
+            ),
+          }}
+        />
+      ))}
     </Tabs>
   );
 }
