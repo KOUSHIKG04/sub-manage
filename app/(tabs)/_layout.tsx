@@ -1,7 +1,7 @@
 import { icons } from "@/src/constants/icon";
 import { useTheme } from "@/src/theme/useTheme";
 import { Tabs } from "expo-router";
-import { Image,TouchableOpacity, View } from "react-native";
+import { Image, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function TabLayout() {
@@ -38,11 +38,10 @@ export default function TabLayout() {
         tabBarStyle: {
           backgroundColor: theme.card,
           position: "absolute",
-          // bottom: insets.bottom > 0 ? insets.bottom : 20,
-          height: 85,
+          height: 73 + Math.max(insets.bottom, 12),
           borderTopWidth: 0,
           paddingTop: 10,
-          paddingBottom: 12,
+          paddingBottom: Math.max(insets.bottom, 12),
         },
         tabBarActiveTintColor: theme.accent,
         tabBarInactiveTintColor: theme.border,

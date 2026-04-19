@@ -21,7 +21,7 @@ export const themeColors = {
     },
     dark: {
         primaryFill: "#111111",
-        surfaceFill: "#22201F",
+        surfaceFill: "#2f2c2b",
         containerFill: "#363636",
         text: "#FFFFFF",
         stroke: "#a1a1a19e",
@@ -30,14 +30,14 @@ export const themeColors = {
         semanticRed: "#FF4F41",
         whiteConstant: "#FFFFFF",
         background: "#111111",
-        card: "#22201F",
+        card: "#2f2c2b",
         muted: "#363636",
         primary: "#FFFFFF",
         accent: "#FF5C00",
         border: "#a1a1a19e",
         success: "#23BB2D",
         destructive: "#FF4F41",
-        subscription: "#8fd1bd", // Assuming same for dark, or adjust if needed
+        subscription: "#8fd1bd",
     },
 } as const;
 
