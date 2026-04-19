@@ -12,17 +12,25 @@
 @tailwind utilities;
 
 
-@theme {
-    --color-background: #fff9e3;
-    --color-foreground: #081126;
-    --color-card: #fff8e7;
-    --color-muted: #f6eecf;
-    --color-muted-foreground: rgba(0, 0, 0, 0.6);
-    --color-primary: #081126;
-    --color-accent: #ea7a53;
-    --color-border: rgba(0, 0, 0, 0.1);
-    --color-success: #16a34a;
-    --color-destructive: #dc2626;
+:root {
+    /* light theme */
+    --color-primary-fill: #FBF6F3;
+    --color-surface-fill: #FFFFFF;
+    --color-container-fill: #ffe7da9a;
+    --color-text: #010101;
+    --color-stroke: #A7A4A2;
+    --color-primary-orange: #FF5C00;
+    --color-semantic-green: #14761A;
+    --color-semantic-red: #FF4F41;
+
+    --color-background: var(--color-primary-fill);
+    --color-card: var(--color-surface-fill);
+    --color-muted: var(--color-container-fill);
+    --color-primary: var(--color-text);
+    --color-accent: var(--color-primary-orange);
+    --color-border: var(--color-stroke);
+    --color-success: var(--color-semantic-green);
+    --color-destructive: var(--color-semantic-red);
     --color-subscription: #8fd1bd;
 
     --spacing-0: 0px;
@@ -52,6 +60,28 @@
     --font-sans-bold: sans-bold;
     --font-sans-extrabold: sans-extrabold;
 }
+
+.dark {
+    --color-primary-fill: #111111;
+    --color-surface-fill: #22201F;
+    --color-container-fill: #363636;
+    --color-text: #FFFFFF;
+    --color-stroke: #a1a1a19e;
+    --color-primary-orange: #FF5C00;
+    --color-semantic-green: #23BB2D;
+    --color-semantic-red: #FF4F41;
+
+    --color-background: var(--color-primary-fill);
+    --color-card: var(--color-surface-fill);
+    --color-muted: var(--color-container-fill);
+    --color-primary: var(--color-text);
+    --color-accent: var(--color-primary-orange);
+    --color-border: var(--color-stroke);
+    --color-success: var(--color-semantic-green);
+    --color-destructive: var(--color-semantic-red);
+    --color-subscription: #8fd1bd;
+}
+
 
 @layer components {
     .tabs-icon {
