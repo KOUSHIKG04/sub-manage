@@ -1,6 +1,6 @@
 import { View, Text, Image } from "react-native";
 import React from "react";
-// import { formatCurrency } from "@/src/lib/utils";
+import { formatCurrency } from "@/src/lib/utils";
 
 export default function UpcomingSubscriptionCard({
   name,
@@ -8,14 +8,14 @@ export default function UpcomingSubscriptionCard({
   daysLeft,
   icon,
   currency,
-}: UpcomingSubscription) {
+}: Omit<UpcomingSubscription, "id">) {
   return (
     <View className="upcoming-card">
       <View className="upcoming-row">
         <Image source={icon} className="upcoming-icon" />
         <View>
           <Text className="upcoming-price">
-            {/* {formatCurrency(price, currency ?? "USD")} */}
+            {formatCurrency(price, currency ?? "USD")}
           </Text>
           <Text className="upcoming-meta" numberOfLines={1}>
             {daysLeft <= 0

@@ -7,7 +7,7 @@ export default function Home() {
   return (
     <Screen>
       <View>
-        <Text className="text-2xl font-sans-bold">Home</Text>
+        <Text className="text-2xl font-sans-bold text-primary">Home</Text>
       </View>
     </Screen>
   );
