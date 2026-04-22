@@ -62,6 +62,7 @@ export default function Home() {
         <View className="mb-5 mt-2">
           <ListHeading
             title="Upcoming"
+            // TODO
             onPressViewAll={() => console.log("View all pressed")}
           />
           {/* <FlatList
@@ -82,7 +83,7 @@ export default function Home() {
           scroll behavior carefully. For a tiny header carousel like yours,
           ScrollView is usually the right tradeoff because it avoids warnings
           and complexity without hurting performance. */}
-          
+
           {UPCOMING_SUBSCRIPTIONS.length > 0 ? (
             <ScrollView
               horizontal
@@ -108,6 +109,7 @@ export default function Home() {
 
         <ListHeading
           title="All Subscriptions"
+          // TODO
           onPressViewAll={() => console.log("ALL SUB")}
         />
       </>
