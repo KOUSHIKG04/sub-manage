@@ -24,7 +24,7 @@ export const themeColors = {
         surfaceFill: "#2f2c2b",
         containerFill: "#363636",
         text: "#FFFFFF",
-        stroke: "#a1a1a19e",
+        stroke: "#2a2a2a",
         primaryOrange: "#FF5C00",
         semanticGreen: "#23BB2D",
         semanticRed: "#FF4F41",
