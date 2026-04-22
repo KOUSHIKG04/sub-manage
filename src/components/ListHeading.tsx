@@ -7,15 +7,15 @@ export default function ListHeading({
 }: ListHeadingProps) {
   return (
     <View className="list-head">
-      <Text className="list-title">{title}</Text>
+      <Text className="list-title text-primary">{title}</Text>
 
       <TouchableOpacity
-        className="list-action"
+        className="list-action bg-card border-border"
         onPress={onPressViewAll}
         accessibilityRole="button"
         accessibilityLabel={`View all ${title}`}
       >
-        <Text className="list-action-text">View all</Text>
+        <Text className="list-action-text text-primary">View all</Text>
       </TouchableOpacity>
     </View>
   );

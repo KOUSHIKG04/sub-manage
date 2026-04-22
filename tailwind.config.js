@@ -11,17 +11,17 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        background: "#FBF6F3",
-        foreground: "#010101",
-        card: "#FFFFFF",
-        muted: "#ffe7da9a",
-        "muted-foreground": "#A7A4A2",
-        primary: "#010101",
-        accent: "#FF5C00",
-        border: "#A7A4A2",
-        success: "#14761A",
-        destructive: "#FF4F41",
-        subscription: "#8fd1bd",
+        background: "var(--color-background)",
+        foreground: "var(--color-primary)",
+        card: "var(--color-card)",
+        muted: "var(--color-muted)",
+        "muted-foreground": "var(--color-muted-foreground)",
+        primary: "var(--color-primary)",
+        accent: "var(--color-accent)",
+        border: "var(--color-border)",
+        success: "var(--color-success)",
+        destructive: "var(--color-destructive)",
+        subscription: "var(--color-subscription)",
         white: "#FFFFFF",
       },
       fontFamily: {
