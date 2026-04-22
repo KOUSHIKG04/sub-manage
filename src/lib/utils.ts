@@ -1,5 +1,15 @@
 import dayjs from "dayjs";
 
+/**
+ * Formats a number into a currency string.
+ *
+ * @param value - The numeric value to format
+ * @param currency - Currency code (e.g., USD, INR)
+ * @param options - Optional formatting options
+ * @returns Formatted currency string
+ */
+
+
 export const formatCurrency = (value: number, currency = "USD"): string => {
     try {
         return new Intl.NumberFormat("en-US", {

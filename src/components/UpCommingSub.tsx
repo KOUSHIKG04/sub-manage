@@ -12,11 +12,18 @@ export default function UpcomingSubscriptionCard({
 }: Omit<UpcomingSubscription, "id">) {
   const { theme } = useTheme();
   return (
-    <View className="upcoming-card" style={{ backgroundColor: theme.primary }}>
+    <View
+      className="upcoming-card"
+      style={{
+        backgroundColor: theme.card,
+        borderWidth: 0.7,
+        borderColor: theme.stroke,
+      }}
+    >
       <View className="upcoming-row">
         <Image source={icon} className="upcoming-icon" />
         <View>
-          <Text className="upcoming-price" style={{ color: theme.stroke }}>
+          <Text className="upcoming-price" style={{ color: theme.text }}>
             {formatCurrency(price, currency ?? "USD")}
           </Text>
           <Text className="upcoming-meta" numberOfLines={1}>
@@ -29,13 +36,7 @@ export default function UpcomingSubscriptionCard({
         </View>
       </View>
 
-      <Text
-        style={{
-          color: theme.stroke,
-          marginTop: 2,
-        }}
-        numberOfLines={1}
-      >
+      <Text className="text-lg font-sans-bold" numberOfLines={1}>
         {name}
       </Text>
     </View>

@@ -67,7 +67,7 @@
     --color-surface-fill: #2f2c2b;
     --color-container-fill: #363636;
     --color-text: #FFFFFF;
-    --color-stroke: #a1a1a19e;
+    --color-stroke: #2a2a2a;
     --color-primary-orange: #FF5C00;
     --color-semantic-green: #23BB2D;
     --color-semantic-red: #FF4F41;
@@ -160,7 +160,7 @@
     }
 
     .upcoming-card {
-        @apply mr-4 w-44 rounded-2xl border border-black/10 p-4;
+        @apply mr-4 w-44 rounded-2xl p-4;
     }
 
     .upcoming-row {
@@ -220,11 +220,11 @@
     }
 
     .sub-price {
-        @apply mb-1 text-lg font-sans-bold ;
+        @apply mb-1 text-lg font-sans-bold;
     }
 
     .sub-billing {
-        @apply text-sm font-sans-medium ;
+        @apply text-sm font-sans-medium;
     }
 
     .sub-body {
@@ -248,7 +248,7 @@
     }
 
     .sub-value {
-        @apply flex-1 font-sans-bold ;
+        @apply flex-1 font-sans-bold;
     }
 
     .sub-cancel {

@@ -28,6 +28,10 @@ export default function SubscriptionCard({
   return (
     <Pressable
       onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel={`${name} subscription`}
+      accessibilityHint={expanded ? "Collapses details" : "Expands details"}
+      accessibilityState={{ expanded }}
       className={clsx("sub-card", expanded ? "sub-card-expanded" : "bg-card")}
       style={!expanded && color ? { backgroundColor: color } : undefined}
     >
@@ -67,7 +71,7 @@ export default function SubscriptionCard({
                   numberOfLines={1}
                   ellipsizeMode="tail"
                 >
-                  {paymentMethod?.trim() ?? "Not provided"}
+                  {paymentMethod?.trim() || "Not provided"}
                 </Text>
               </View>
             </View>
@@ -79,7 +83,7 @@ export default function SubscriptionCard({
                   numberOfLines={1}
                   ellipsizeMode="tail"
                 >
-                  {(category?.trim() || plan?.trim()) ?? "Not provided"}
+                  {category?.trim() || plan?.trim() || "Not provided"}
                 </Text>
               </View>
             </View>
@@ -119,7 +123,9 @@ export default function SubscriptionCard({
                   numberOfLines={1}
                   ellipsizeMode="tail"
                 >
-                  {status ? formatStatusLabel(status) : "Not provided"}
+                  {status?.trim()
+                    ? formatStatusLabel(status.trim())
+                    : "Not provided"}
                 </Text>
               </View>
             </View>
