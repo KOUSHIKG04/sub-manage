@@ -140,7 +140,7 @@
     }
 
     .home-balance-date {
-        @apply text-2xl font-sans-medium text-white;
+        @apply text-xl font-sans-medium text-white;
     }
 
     .list-head {
@@ -176,7 +176,7 @@
     }
 
     .upcoming-meta {
-        @apply text-sm font-sans-semibold text-muted-foreground;
+        @apply text-sm font-sans-semibold;
     }
 
     /* .upcoming-name {

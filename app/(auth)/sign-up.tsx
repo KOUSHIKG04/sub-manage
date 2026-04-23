@@ -46,11 +46,18 @@ export default function SignUp() {
       return;
     }
 
-    if (!error) await signUp.verifications.sendEmailCode();
+    const sendResult = await signUp.verifications.sendEmailCode();
+    if (sendResult.error) {
+      console.error(JSON.stringify(sendResult.error, null, 2));
+    }
   };
 
   const onPressVerify = async () => {
-    await signUp.verifications.verifyEmailCode({ code });
+    const { error } = await signUp.verifications.verifyEmailCode({ code });
+    if (error) {
+      console.error(JSON.stringify(error, null, 2));
+      return;
+    }
 
     if (signUp.status === "complete") {
       await signUp.finalize({
@@ -79,7 +86,7 @@ export default function SignUp() {
     } catch (err) {
       console.error("OAuth error", err);
     }
-  }, [startSSOFlow]);
+  }, [startSSOFlow, router]);
 
   const isPendingVerification =
     signUp.status === "missing_requirements" &&
@@ -194,7 +201,7 @@ export default function SignUp() {
 
                 <View className="mt-8 flex-row flex-wrap items-center justify-center">
                   <Text className="font-sans-regular text-primary">
-                    Already have an account? {" "}
+                    Already have an account?{" "}
                   </Text>
                   <Link href="/(auth)/sign-in" asChild>
                     <Pressable>

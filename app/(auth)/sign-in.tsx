@@ -60,10 +60,12 @@ export default function SignIn() {
 
     if (signIn.status === "complete") {
       await signIn.finalize({
-        navigate: () => {
+        navigate:async () => {
           router.replace("/(tabs)");
         },
       });
+      // Or, omit navigate entirely and let Expo Router's layout handle navigation via useAuth() hook:
+      // await signIn.finalize();
     } else {
       console.error("Sign-in attempt not complete:", signIn);
     }
@@ -85,7 +87,7 @@ export default function SignIn() {
     } catch (err) {
       console.error("OAuth error", err);
     }
-  }, [startSSOFlow]);
+  }, [startSSOFlow, router]);
 
   return (
     <Screen className="p-0">

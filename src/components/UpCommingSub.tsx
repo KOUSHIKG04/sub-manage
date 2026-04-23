@@ -15,7 +15,7 @@ export default function UpcomingSubscriptionCard({
     <View
       className="upcoming-card"
       style={{
-        backgroundColor: theme.card,
+        backgroundColor: "#ffff",
         borderWidth: 0.7,
         borderColor: theme.stroke,
       }}
@@ -23,10 +23,14 @@ export default function UpcomingSubscriptionCard({
       <View className="upcoming-row">
         <Image source={icon} className="upcoming-icon" />
         <View>
-          <Text className="upcoming-price" style={{ color: theme.text }}>
+          <Text className="upcoming-price" style={{ color: "#1a1a1a" }}>
             {formatCurrency(price, currency ?? "USD")}
           </Text>
-          <Text className="upcoming-meta" numberOfLines={1}>
+          <Text
+            className="upcoming-meta"
+            style={{ color: "#A7A4A2" }}
+            numberOfLines={1}
+          >
             {daysLeft <= 0
               ? "Expired"
               : daysLeft === 1

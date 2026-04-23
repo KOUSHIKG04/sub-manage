@@ -5,6 +5,7 @@ import { ViewProps } from "react-native";
 
 interface ScreenProps extends ViewProps {
   children: React.ReactNode;
+  className?: string;
 }
 
 export default function Screen({ children, className, ...props }: ScreenProps) {
