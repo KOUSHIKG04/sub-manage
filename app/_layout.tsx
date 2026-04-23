@@ -6,9 +6,16 @@ import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
 import { View } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import { ClerkProvider } from "@clerk/expo";
+import { tokenCache } from "@clerk/expo/token-cache";
 
 void SplashScreen.preventAutoHideAsync().catch(() => {});
 
+const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY!;
+
+if (!publishableKey) {
+  throw new Error("Add your Clerk Publishable Key to the .env file");
+}
 
 export default function RootLayout() {
   const { isDark, theme } = useTheme();
@@ -31,22 +38,25 @@ export default function RootLayout() {
   if (fontError) throw fontError;
 
   return (
-    <SafeAreaProvider>
-      <View
-        className={
-          isDark ? "dark flex-1 bg-background" : "flex-1 bg-background"
-        }
-      >
-        <Stack
-          screenOptions={{
-            headerShown: false,
-            contentStyle: { backgroundColor: theme.background },
-            animation: "default",
-          }}
+    <ClerkProvider publishableKey={publishableKey} tokenCache={tokenCache}>
+      <SafeAreaProvider>
+        <View
+          className={
+            isDark ? "dark flex-1 bg-background" : "flex-1 bg-background"
+          }
         >
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        </Stack>
-      </View>
-    </SafeAreaProvider>
+          <Stack
+            screenOptions={{
+              headerShown: false,
+              contentStyle: { backgroundColor: theme.background },
+              animation: "default",
+            }}
+          >
+            <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          </Stack>
+        </View>
+      </SafeAreaProvider>
+    </ClerkProvider>
   );
 }

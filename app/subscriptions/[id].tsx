@@ -9,7 +9,7 @@ export default function SubscriptionDetails() {
   return (
     <Screen>
       <View className="flex-1 items-center justify-center">
-        <Text className="text-primary">Subscription Details: {id}</Text>+{" "}
+        <Text className="text-primary">Subscription Details: {id}</Text>
       </View>
     </Screen>
   );

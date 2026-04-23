@@ -1,9 +1,20 @@
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useTheme } from "@/src/theme/useTheme";
 
-export default function Screen({ children }: { children: React.ReactNode }) {
+import { ViewProps } from "react-native";
+
+interface ScreenProps extends ViewProps {
+  children: React.ReactNode;
+}
+
+export default function Screen({ children, className, ...props }: ScreenProps) {
   const { theme } = useTheme();
   return (
-    <SafeAreaView className="flex-1 p-5 bg-background">{children}</SafeAreaView>
+    <SafeAreaView 
+      className={className ? `flex-1 bg-background ${className}` : "flex-1 p-5 bg-background"} 
+      {...props}
+    >
+      {children}
+    </SafeAreaView>
   );
 }
