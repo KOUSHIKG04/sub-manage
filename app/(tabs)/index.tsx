@@ -129,10 +129,12 @@ export default function Home() {
 
   const onRefresh = async () => {
     setRefreshing(true);
-    // TODO: replace with fubction call for refresh window
-    // Simulate fetching data or re-calculating stats,
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-    setRefreshing(false);
+    try {
+      // TODO: replace with function call for refresh window
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+    } finally {
+      setRefreshing(false);
+    }
   };
 
   return (

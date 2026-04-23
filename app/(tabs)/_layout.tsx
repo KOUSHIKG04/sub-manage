@@ -1,14 +1,14 @@
 import { icons } from "@/src/constants/icon";
 import { useTheme } from "@/src/theme/useTheme";
-import { Tabs, Redirect } from "expo-router";
-import { Image, View, ActivityIndicator } from "react-native";
 import { useAuth } from "@clerk/expo";
+import { Tabs } from "expo-router";
+import { ActivityIndicator, Image, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function TabLayout() {
   const { theme } = useTheme();
   const insets = useSafeAreaInsets();
-  const { isSignedIn, isLoaded } = useAuth();
+  const { isLoaded } = useAuth();
 
   if (!isLoaded) {
     return (
@@ -18,10 +18,6 @@ export default function TabLayout() {
     );
   }
 
-  if (!isSignedIn) {
-    return <Redirect href="/(auth)/sign-in" />;
-  }
-  
   const TABS = [
     {
       name: "index",

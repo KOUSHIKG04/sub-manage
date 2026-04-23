@@ -1,10 +1,10 @@
-import { useAuth } from '@clerk/expo';
-import { Redirect, Stack } from 'expo-router';
-import { ActivityIndicator, View } from 'react-native';
-import { useTheme } from '@/src/theme/useTheme';
+import { useTheme } from "@/src/theme/useTheme";
+import { useAuth } from "@clerk/expo";
+import { Stack } from "expo-router";
+import { ActivityIndicator, View } from "react-native";
 
 export default function AuthRoutesLayout() {
-  const { isSignedIn, isLoaded } = useAuth();
+  const { isLoaded } = useAuth();
   const { theme } = useTheme();
 
   if (!isLoaded) {
@@ -15,15 +15,11 @@ export default function AuthRoutesLayout() {
     );
   }
 
-  if (isSignedIn) {
-    return <Redirect href={"/(tabs)"} />;
-  }
-
   return (
     <Stack
       screenOptions={{
         headerShown: false,
-        animation: 'fade',
+        animation: "fade",
         contentStyle: { backgroundColor: theme.background },
       }}
     />
