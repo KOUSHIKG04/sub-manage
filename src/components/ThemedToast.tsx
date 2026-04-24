@@ -25,7 +25,7 @@ const ThemedToast = () => {
           fontSize: 15,
         }}
         text2Style={{
-          color: theme.stroke,
+          color: theme.text,
           fontFamily: "PlusJakartaSans-Regular",
           fontSize: 13,
         }}

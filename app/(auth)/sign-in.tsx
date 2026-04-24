@@ -48,8 +48,10 @@ export default function SignIn() {
     setIsSigningIn(true);
 
     try {
-      const res = await signIn?.create({
+      await signIn?.create({
         identifier: emailAddress,
+      });
+      const res = await signIn?.password({
         password,
       });
 
@@ -91,6 +93,7 @@ export default function SignIn() {
     } catch (err) {
       console.log("UNEXPECTED ERROR:", err);
       showErrorToast("Something went wrong");
+      setIsNavigating(false);
       setIsSigningIn(false);
     }
   };

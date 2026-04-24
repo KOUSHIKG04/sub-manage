@@ -188,7 +188,9 @@ export default function Settings() {
             rightElement={
               <Switch
                 value={mode === "system"}
-                onValueChange={(val) => setMode(val ? "system" : "light")}
+                onValueChange={(val) =>
+                  setMode(val ? "system" : isDark ? "dark" : "light")
+                }
                 trackColor={{ false: theme.stroke, true: theme.accent }}
                 thumbColor="#fff"
               />

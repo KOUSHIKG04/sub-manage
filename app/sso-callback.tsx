@@ -2,10 +2,10 @@ import LoaderScreen from "@/src/components/LoaderScreen";
 import { showErrorToast } from "@/src/lib/utils";
 import { useTheme } from "@/src/theme/useTheme";
 import { useClerk } from "@clerk/expo";
-import { useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
 import { useEffect, useState } from "react";
-import { Text, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
 
 // Dismiss the in-app browser if it's still open
 WebBrowser.maybeCompleteAuthSession();
@@ -13,6 +13,7 @@ WebBrowser.maybeCompleteAuthSession();
 export default function SSOCallback() {
   const { theme } = useTheme();
   const { setActive } = useClerk();
+  const router = useRouter();
   const params = useLocalSearchParams<{
     created_session_id?: string;
     rotating_token_nonce?: string;
@@ -50,12 +51,23 @@ export default function SSOCallback() {
       style={{ backgroundColor: theme.background }}
     >
       {error ? (
-        <Text
-          className="px-8 text-center font-sans-medium text-base"
-          style={{ color: theme.destructive || "#ef4444" }}
-        >
-          {error}
-        </Text>
+        <View className="items-center px-8">
+          <Text
+            className="text-center font-sans-medium text-base"
+            style={{ color: theme.destructive || "#ef4444" }}
+          >
+            {error}
+          </Text>
+          <Pressable
+            onPress={() => router.replace("/(auth)/sign-in")}
+            className="mt-4 rounded-[14px] px-4 py-3"
+            style={{ backgroundColor: theme.accent }}
+          >
+            <Text className="text-white font-sans-semibold">
+              Back to Sign In
+            </Text>
+          </Pressable>
+        </View>
       ) : (
         <LoaderScreen description="Completing signin..." />
       )}

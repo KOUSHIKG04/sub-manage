@@ -61,12 +61,18 @@ export default function SignUp() {
     setIsSigningUp(true);
 
     try {
-      await signUp?.create({
+      const res = await signUp?.password({
         emailAddress,
         password,
       });
 
-      // @ts-ignore
+      if (res?.error) {
+        //@ts-ignore
+        showErrorToast(res.error.errors?.[0]?.message || "An error occurred.");
+        setIsSigningUp(false);
+        return;
+      }
+
       await signUp?.verifications.sendEmailCode();
 
       setIsSigningUp(false);
@@ -128,6 +134,7 @@ export default function SignUp() {
     } catch (err) {
       console.log("UNEXPECTED VERIFY ERROR:", err);
       showErrorToast("Something went wrong");
+      setIsNavigating(false);
       setIsVerifying(false);
     }
   };
@@ -175,6 +182,7 @@ export default function SignUp() {
       setIsGoogleLoading(false);
     } catch (err) {
       showErrorToast("Google sign-up failed. Please try again.");
+      setIsNavigating(false);
       setIsGoogleLoading(false);
     }
   }, [startSSOFlow, isGoogleLoading, isSigningUp, isVerifying]);
