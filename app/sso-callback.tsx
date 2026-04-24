@@ -1,4 +1,5 @@
 import LoaderScreen from "@/src/components/LoaderScreen";
+import { showErrorToast } from "@/src/lib/utils";
 import { useTheme } from "@/src/theme/useTheme";
 import { useClerk } from "@clerk/expo";
 import { useLocalSearchParams } from "expo-router";
@@ -21,8 +22,8 @@ export default function SSOCallback() {
   useEffect(() => {
     const completeSession = async () => {
       try {
-        const sessionId = Array.isArray(params.created_session_id) 
-          ? params.created_session_id[0] 
+        const sessionId = Array.isArray(params.created_session_id)
+          ? params.created_session_id[0]
           : params.created_session_id;
 
         if (!sessionId) {
@@ -35,7 +36,7 @@ export default function SSOCallback() {
         await setActive({ session: sessionId });
         // After this, isSignedIn will become true and root layout will redirect to (tabs)
       } catch (err) {
-        console.error("SSO callback error:", err);
+        showErrorToast("Failed to complete sign in. Please try again.");
         setError("Failed to complete sign in. Please try again.");
       }
     };
@@ -56,9 +57,7 @@ export default function SSOCallback() {
           {error}
         </Text>
       ) : (
-       
-          <LoaderScreen description="Completing signin..." />
-       
+        <LoaderScreen description="Completing signin..." />
       )}
     </View>
   );

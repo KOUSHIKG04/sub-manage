@@ -1,5 +1,6 @@
 import "@/global.css";
 import LoaderScreen from "@/src/components/LoaderScreen";
+import ThemedToast from "@/src/components/ThemedToast";
 import { useTheme } from "@/src/theme/useTheme";
 import { ClerkProvider, useAuth } from "@clerk/expo";
 import { tokenCache } from "@clerk/expo/token-cache";
@@ -7,7 +8,7 @@ import { useFonts } from "expo-font";
 import { Stack, useRouter, useSegments } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
-import { ActivityIndicator, View } from "react-native";
+import { View } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
 void SplashScreen.preventAutoHideAsync().catch(() => {});
@@ -19,10 +20,10 @@ if (!publishableKey) {
 }
 
 function InitialLayout() {
-  const { isLoaded, isSignedIn } = useAuth();
   const { isDark, theme } = useTheme();
   const router = useRouter();
   const segments = useSegments();
+  const { isLoaded, isSignedIn } = useAuth();
 
   const [fontsLoaded, fontError] = useFonts({
     "PlusJakartaSans-Light": require("../assets/fonts/PlusJakartaSans-Light.ttf"),
@@ -93,6 +94,7 @@ export default function RootLayout() {
     <ClerkProvider publishableKey={publishableKey} tokenCache={tokenCache}>
       <SafeAreaProvider>
         <InitialLayout />
+        <ThemedToast />
       </SafeAreaProvider>
     </ClerkProvider>
   );

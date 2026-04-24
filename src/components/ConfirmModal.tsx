@@ -27,7 +27,12 @@ export default function ConfirmModal({
   const { theme } = useTheme();
 
   return (
-    <Modal visible={visible} transparent animationType="fade">
+    <Modal
+      visible={visible}
+      transparent
+      animationType="fade"
+      onRequestClose={onCancel}
+    >
       <View
         className="flex-1 justify-center items-center px-6"
         style={{ backgroundColor: "rgba(0,0,0,0.4)" }}

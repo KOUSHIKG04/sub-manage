@@ -15,7 +15,14 @@ export default function LoaderScreen({ description }: LoaderScreenProps) {
         className="text-base font-sans-regular mt-4"
         style={{ color: theme.text }}
       >
-        {description}
+        {description ? (
+          <Text
+            className="text-base font-sans-regular mt-4"
+            style={{ color: theme.text }}
+          >
+            {description}
+          </Text>
+        ) : null}
       </Text>
     </View>
   );

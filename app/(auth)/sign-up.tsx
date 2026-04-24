@@ -1,10 +1,15 @@
-import LoaderScreen from "@/src/components/LoaderScreen";
 import Screen from "@/src/components/Screen";
+import { showErrorToast, showSuccessToast } from "@/src/lib/utils";
 import { useTheme } from "@/src/theme/useTheme";
-import { useSignUp, useSSO } from "@clerk/expo";
+import {
+  isClerkAPIResponseError,
+  useClerk,
+  useSignUp,
+  useSSO,
+} from "@clerk/expo";
 import { Ionicons } from "@expo/vector-icons";
-import { Link, useRouter } from "expo-router";
 import * as Linking from "expo-linking";
+import { Link, useRouter } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
 import React, { useCallback, useEffect, useState } from "react";
 import {
@@ -23,7 +28,6 @@ WebBrowser.maybeCompleteAuthSession();
 export default function SignUp() {
   const { signUp } = useSignUp();
   const { startSSOFlow } = useSSO();
-  const router = useRouter();
   const { theme } = useTheme();
 
   const [emailAddress, setEmailAddress] = useState("");
@@ -34,6 +38,7 @@ export default function SignUp() {
   const [isVerifying, setIsVerifying] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [isNavigating, setIsNavigating] = useState(false);
+  const [isResending, setIsResending] = useState(false);
 
   useEffect(() => {
     void WebBrowser.warmUpAsync();
@@ -56,56 +61,94 @@ export default function SignUp() {
     setIsSigningUp(true);
 
     try {
-      const { error } = await signUp.password({
+      await signUp?.create({
         emailAddress,
         password,
       });
 
-      if (error) {
-        console.error(JSON.stringify(error, null, 2));
-        setIsSigningUp(false);
-        return;
-      }
-
-      const sendResult = await signUp.verifications.sendEmailCode();
-
-      if (sendResult.error) {
-        console.error(JSON.stringify(sendResult.error, null, 2));
-        setIsSigningUp(false);
-        return;
-      }
+      // @ts-ignore
+      await signUp?.verifications.sendEmailCode();
 
       setIsSigningUp(false);
-    } catch (err) {
-      console.error("Sign-up error:", err);
+    } catch (err: any) {
+      if (isClerkAPIResponseError(err)) {
+        showErrorToast(err.errors[0]?.message || "An error occurred.");
+      } else {
+        showErrorToast(err.message || "An unexpected error occurred.");
+      }
       setIsSigningUp(false);
     }
   };
 
   const onPressVerify = async () => {
     if (!code || isVerifying || isSigningUp || isGoogleLoading) return;
-
     setIsVerifying(true);
 
     try {
-      const { error } = await signUp.verifications.verifyEmailCode({ code });
+      const res = await signUp?.verifications.verifyEmailCode({
+        code,
+      });
 
-      if (error) {
-        console.error(JSON.stringify(error, null, 2));
+      if (res?.error) {
+        const clerkError = res.error;
+        let message =
+          // @ts-ignore
+          clerkError.errors?.[0]?.longMessage || clerkError.errors?.[0]?.message ||
+          "Invalid verification code";
+
+        const lowerMsg = message.toLowerCase();
+
+        if (lowerMsg.includes("code")) {
+          message = "Invalid or expired code";
+        } else if (lowerMsg.includes("too many")) {
+          message = "Too many attempts. Try again later";
+        }
+
+        showErrorToast(message);
         setIsVerifying(false);
         return;
       }
 
-      if (signUp.status === "complete") {
+      if (signUp?.status === "complete") {
         setIsNavigating(true);
         await signUp.finalize();
-      } else {
-        console.error("Sign-up attempt not complete:", signUp);
-        setIsVerifying(false);
+        showSuccessToast("Account created successfully!");
+        return;
       }
-    } catch (err) {
-      console.error("Verification error:", err);
+
+      // fallback (rare)
+      const missing = signUp?.missingFields?.join(", ");
+
+      const message = missing
+        ? `Missing required fields: ${missing}`
+        : "Sign-up not complete. Please try again.";
+
+      showErrorToast(message);
       setIsVerifying(false);
+    } catch (err) {
+      console.log("UNEXPECTED VERIFY ERROR:", err);
+      showErrorToast("Something went wrong");
+      setIsVerifying(false);
+    }
+  };
+
+  const onResendCode = async () => {
+    if (isResending || isAnyLoading) return;
+
+    setIsResending(true);
+
+    try {
+      // @ts-ignore
+      await signUp?.verifications.sendEmailCode();
+      // Optionally, you can set a success message here or start a cooldown timer
+      setIsResending(false);
+    } catch (err: any) {
+      if (isClerkAPIResponseError(err)) {
+        showErrorToast(err.errors[0]?.message || "An error occurred.");
+      } else {
+        showErrorToast(err.message || "An unexpected error occurred.");
+      }
+      setIsResending(false);
     }
   };
 
@@ -117,7 +160,9 @@ export default function SignUp() {
     try {
       const { createdSessionId, setActive } = await startSSOFlow({
         strategy: "oauth_google",
-        redirectUrl: Linking.createURL("/(auth)/sign-up", { scheme: "submanage" }),
+        redirectUrl: Linking.createURL("/sso-callback", {
+          scheme: "submanage",
+        }),
       });
 
       if (createdSessionId && setActive) {
@@ -129,14 +174,14 @@ export default function SignUp() {
 
       setIsGoogleLoading(false);
     } catch (err) {
-      console.error("OAuth error", err);
+      showErrorToast("Google sign-up failed. Please try again.");
       setIsGoogleLoading(false);
     }
-  }, [startSSOFlow, router, isGoogleLoading, isSigningUp, isVerifying]);
+  }, [startSSOFlow, isGoogleLoading, isSigningUp, isVerifying]);
 
   const isPendingVerification = Boolean(
     signUp?.status === "missing_requirements" &&
-      signUp?.unverifiedFields?.includes("email_address")
+    signUp?.unverifiedFields?.includes("email_address"),
   );
 
   const isAnyLoading =
@@ -144,8 +189,8 @@ export default function SignUp() {
     isVerifying ||
     isGoogleLoading ||
     isNavigating ||
+    isResending ||
     !signUp;
-
 
   return (
     <Screen className="p-0">
@@ -361,6 +406,26 @@ export default function SignUp() {
                     </Text>
                   )}
                 </Pressable>
+
+                <View className="mt-6 flex-row flex-wrap items-center justify-center">
+                  <Text
+                    className="font-sans-regular"
+                    style={{ color: theme.text }}
+                  >
+                    Didn't receive the code?{" "}
+                  </Text>
+                  <Pressable onPress={onResendCode} disabled={isAnyLoading}>
+                    <Text
+                      className="font-sans-semibold"
+                      style={{
+                        color: theme.accent,
+                        opacity: isAnyLoading ? 0.7 : 1,
+                      }}
+                    >
+                      {isResending ? "Resending..." : "Resend"}
+                    </Text>
+                  </Pressable>
+                </View>
               </View>
             )}
           </View>

@@ -1,5 +1,6 @@
 import ConfirmModal from "@/src/components/ConfirmModal";
 import Screen from "@/src/components/Screen";
+import { showErrorToast } from "@/src/lib/utils";
 import { useTheme } from "@/src/theme/useTheme";
 import { useClerk, useUser } from "@clerk/expo";
 import { Ionicons } from "@expo/vector-icons";
@@ -16,10 +17,11 @@ export default function Settings() {
 
   const handleSignOut = async () => {
     try {
+      setShowSignOutModal(false);
       await signOut();
-      router.replace("/(auth)/sign-in");
+      // router.replace("/(auth)/sign-in");
     } catch (err) {
-      console.error("Sign out error:", err);
+      showErrorToast("Failed to sign out. Please try again.");
     }
   };
 

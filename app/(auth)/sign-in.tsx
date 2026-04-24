@@ -1,12 +1,13 @@
-import LoaderScreen from "@/src/components/LoaderScreen";
 import Screen from "@/src/components/Screen";
+import { showErrorToast, showSuccessToast } from "@/src/lib/utils";
 import { useTheme } from "@/src/theme/useTheme";
-import { useSignIn, useSSO } from "@clerk/expo";
+import { useClerk, useSignIn, useSSO } from "@clerk/expo";
 import { Ionicons } from "@expo/vector-icons";
-import { Link, useRouter } from "expo-router";
 import * as Linking from "expo-linking";
+import { Link, useRouter } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
 import React, { useCallback, useEffect, useState } from "react";
+
 import {
   ActivityIndicator,
   KeyboardAvoidingView,
@@ -22,6 +23,7 @@ WebBrowser.maybeCompleteAuthSession();
 
 export default function SignIn() {
   const { signIn } = useSignIn();
+  const { setActive } = useClerk();
   const { startSSOFlow } = useSSO();
   const router = useRouter();
   const { theme } = useTheme();
@@ -46,33 +48,49 @@ export default function SignIn() {
     setIsSigningIn(true);
 
     try {
-      const { error } = await signIn.password({
-        emailAddress,
+      const res = await signIn?.create({
+        identifier: emailAddress,
         password,
       });
 
-      if (error) {
-        console.error(JSON.stringify(error, null, 2));
+      if (res?.error) {
+        let message =
+          // @ts-ignore
+          res.error.errors?.[0]?.longMessage || res.error.errors?.[0]?.message ||
+          "Invalid credentials";
+
+        const lowerMsg = message.toLowerCase();
+
+        if (lowerMsg.includes("password")) {
+          message = "Wrong password";
+        } else if (
+          lowerMsg.includes("identifier") ||
+          lowerMsg.includes("account") ||
+          lowerMsg.includes("not found")
+        ) {
+          message = "Account not found, please create account";
+        } else if (lowerMsg.includes("too many")) {
+          message = "Too many attempts. Try again later";
+        }
+
+        showErrorToast(message);
         setIsSigningIn(false);
         return;
       }
 
-      if (signIn.status === "complete") {
+      if (signIn?.status === "complete") {
         setIsNavigating(true);
-        // await signIn.finalize({
-        //   navigate:async () => {
-        //     router.replace("/(tabs)");
-        //   },
-        // });
-        //  omit navigate entirely -> Expo Router's layout handle navigation via useAuth() hook:
         await signIn.finalize();
-        // If your auth layout auto-redirects after finalize, no router.replace needed here
-      } else {
-        console.error("Sign-in attempt not complete:", signIn);
-        setIsSigningIn(false);
+        showSuccessToast("Signed in successfully!");
+        return;
       }
+
+      // fallback
+      showErrorToast("Sign-in not complete. Try again.");
+      setIsSigningIn(false);
     } catch (err) {
-      console.error("Sign-in error:", err);
+      console.log("UNEXPECTED ERROR:", err);
+      showErrorToast("Something went wrong");
       setIsSigningIn(false);
     }
   };
@@ -85,7 +103,9 @@ export default function SignIn() {
     try {
       const { createdSessionId, setActive } = await startSSOFlow({
         strategy: "oauth_google",
-        redirectUrl: Linking.createURL("/(auth)/sign-in", { scheme: "submanage" }),
+        redirectUrl: Linking.createURL("/sso-callback", {
+          scheme: "submanage",
+        }),
       });
 
       if (createdSessionId && setActive) {
@@ -97,17 +117,14 @@ export default function SignIn() {
 
       setIsGoogleLoading(false);
     } catch (err) {
-      console.error("OAuth error", err);
+      showErrorToast("Google sign-in failed. Please try again.");
+      setIsNavigating(false);
       setIsGoogleLoading(false);
     }
   }, [startSSOFlow, router, isGoogleLoading, isSigningIn]);
 
   const isAnyLoading =
-    isSigningIn ||
-    isGoogleLoading ||
-    isNavigating ||
-    !signIn;
-
+    isSigningIn || isGoogleLoading || isNavigating || !signIn;
 
   return (
     <Screen className="p-0">
@@ -160,7 +177,7 @@ export default function SignIn() {
                     backgroundColor: theme.surfaceFill,
                   }}
                 />
-                </View>
+              </View>
 
               <View>
                 <Text
@@ -184,7 +201,7 @@ export default function SignIn() {
                     backgroundColor: theme.surfaceFill,
                   }}
                 />
-                </View>
+              </View>
 
               <Pressable
                 onPress={onSignInPress}
@@ -268,21 +285,6 @@ export default function SignIn() {
             </View>
           </View>
         </ScrollView>
-
-        {isNavigating && (
-          <View
-            className="absolute inset-0 items-center justify-center"
-            style={{ backgroundColor: theme.background + "CC" }}
-          >
-            <ActivityIndicator size="large" color={theme.accent} />
-            <Text
-              className="mt-4 font-sans-medium text-base"
-              style={{ color: theme.text }}
-            >
-              Signing you in...
-            </Text>
-          </View>
-        )}
       </KeyboardAvoidingView>
     </Screen>
   );
