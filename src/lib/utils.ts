@@ -1,4 +1,5 @@
 import dayjs from "dayjs";
+import Toast from "react-native-toast-message";
 
 /**
  * Formats a number into a currency string.
@@ -33,4 +34,20 @@ export const formatStatusLabel = (value?: string): string => {
     if (!value) return "Unknown";
     const normalized = value.trim().toLowerCase();
     return normalized.charAt(0).toUpperCase() + normalized.slice(1);
+};
+
+export const showSuccessToast = (message: string) => {
+    Toast.show({
+        type: 'success',
+        text1: 'Success',
+        text2: message,
+    });
+};
+
+export const showErrorToast = (message: string) => {
+    Toast.show({
+        type: 'error',
+        text1: 'Error',
+        text2: message,
+    });
 };

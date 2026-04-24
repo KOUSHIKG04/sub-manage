@@ -11,7 +11,14 @@ import image from "@/src/constants/image";
 import { formatCurrency } from "@/src/lib/utils";
 import { useTheme } from "@/src/theme/useTheme";
 import dayjs from "dayjs";
-import { Image, Text, View, FlatList, ScrollView } from "react-native";
+import {
+  Image,
+  Text,
+  View,
+  FlatList,
+  ScrollView,
+  RefreshControl,
+} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import SubscriptionCard from "@/src/components/SubscriptionCard";
 import { useCallback, useState } from "react";
@@ -22,6 +29,7 @@ export default function Home() {
   const [expandedSubscriptionId, setExpandedSubscriptionId] = useState<
     string | null
   >(null);
+  const [refreshing, setRefreshing] = useState(false);
 
   const insets = useSafeAreaInsets();
 
@@ -40,9 +48,11 @@ export default function Home() {
               className="w-10 h-10 rounded-full items-center justify-center"
               style={{
                 backgroundColor: theme.surfaceFill,
+                borderWidth: 0.7,
+                borderColor: theme.stroke,
               }}
             >
-              <Ionicons name="add" size={35} color={theme.text} />
+              <Ionicons name="add" size={33} color={theme.text} />
             </View>
           </View>
         </View>
@@ -117,6 +127,16 @@ export default function Home() {
     [theme],
   );
 
+  const onRefresh = async () => {
+    setRefreshing(true);
+    try {
+      // TODO: replace with function call for refresh window
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
   return (
     <Screen>
       <FlatList
@@ -143,6 +163,14 @@ export default function Home() {
         contentContainerStyle={{
           paddingBottom: 50 + insets.bottom,
         }}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={theme.primaryOrange}
+            colors={[theme.primaryOrange]}
+          />
+        }
       />
     </Screen>
   );

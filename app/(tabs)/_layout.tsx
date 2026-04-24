@@ -1,12 +1,23 @@
 import { icons } from "@/src/constants/icon";
 import { useTheme } from "@/src/theme/useTheme";
+import { useAuth } from "@clerk/expo";
 import { Tabs } from "expo-router";
-import { Image, View } from "react-native";
+import { ActivityIndicator, Image, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function TabLayout() {
   const { theme } = useTheme();
   const insets = useSafeAreaInsets();
+  const { isLoaded } = useAuth();
+
+  if (!isLoaded) {
+    return (
+      <View className="flex-1 items-center justify-center bg-background">
+        <ActivityIndicator size="large" color={theme.accent} />
+      </View>
+    );
+  }
+
   const TABS = [
     {
       name: "index",
