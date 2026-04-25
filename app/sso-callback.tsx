@@ -60,11 +60,11 @@ export default function SSOCallback() {
           </Text>
           <Pressable
             onPress={() => router.replace("/(auth)/sign-in")}
-            className="mt-4 rounded-[14px] px-4 py-3"
+            className="mt-8 rounded-[24px] px-6 py-4"
             style={{ backgroundColor: theme.accent }}
           >
             <Text className="text-white font-sans-semibold">
-              Back to Sign In
+              BACK TO SIGN-IN
             </Text>
           </Pressable>
         </View>

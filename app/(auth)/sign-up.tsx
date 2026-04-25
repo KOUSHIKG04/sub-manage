@@ -9,8 +9,9 @@ import {
 } from "@clerk/expo";
 import { Ionicons } from "@expo/vector-icons";
 import * as Linking from "expo-linking";
-import { Link, useRouter } from "expo-router";
+import { Link } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
+import { usePostHog } from "posthog-react-native";
 import React, { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
@@ -29,6 +30,7 @@ export default function SignUp() {
   const { signUp } = useSignUp();
   const { startSSOFlow } = useSSO();
   const { theme } = useTheme();
+  const posthog = usePostHog();
 
   const [emailAddress, setEmailAddress] = useState("");
   const [password, setPassword] = useState("");
@@ -68,20 +70,23 @@ export default function SignUp() {
 
       if (res?.error) {
         //@ts-ignore
-        showErrorToast(res.error.errors?.[0]?.message || "An error occurred.");
+        const errMsg = res.error.errors?.[0]?.message || "An error occurred.";
+        posthog.capture("sign_up_failed", { method: "email", reason: errMsg, email: emailAddress });
+        showErrorToast(errMsg);
         setIsSigningUp(false);
         return;
       }
 
       await signUp?.verifications.sendEmailCode();
+      posthog.capture("sign_up_email_verification_sent", { email: emailAddress });
 
       setIsSigningUp(false);
     } catch (err: any) {
-      if (isClerkAPIResponseError(err)) {
-        showErrorToast(err.errors[0]?.message || "An error occurred.");
-      } else {
-        showErrorToast(err.message || "An unexpected error occurred.");
-      }
+      const errMsg = isClerkAPIResponseError(err)
+        ? err.errors[0]?.message || "An error occurred."
+        : err.message || "An unexpected error occurred.";
+      posthog.capture("sign_up_failed", { method: "email", reason: errMsg, email: emailAddress });
+      showErrorToast(errMsg);
       setIsSigningUp(false);
     }
   };
@@ -118,6 +123,7 @@ export default function SignUp() {
       if (signUp?.status === "complete") {
         setIsNavigating(true);
         await signUp.finalize();
+        posthog.capture("signed_up", { method: "email", email: emailAddress });
         showSuccessToast("Account created successfully!");
         return;
       }
@@ -133,6 +139,7 @@ export default function SignUp() {
       setIsVerifying(false);
     } catch (err) {
       console.log("UNEXPECTED VERIFY ERROR:", err);
+      posthog.capture("sign_up_failed", { method: "email", reason: "unexpected_error", email: emailAddress });
       showErrorToast("Something went wrong");
       setIsNavigating(false);
       setIsVerifying(false);
@@ -175,17 +182,19 @@ export default function SignUp() {
       if (createdSessionId && setActive) {
         setIsNavigating(true);
         await setActive({ session: createdSessionId });
+        posthog.capture("signed_up", { method: "google" });
         // router.replace("/(tabs)");
         return;
       }
 
       setIsGoogleLoading(false);
     } catch (err) {
+      posthog.capture("sign_up_failed", { method: "google", reason: "sso_error" });
       showErrorToast("Google sign-up failed. Please try again.");
       setIsNavigating(false);
       setIsGoogleLoading(false);
     }
-  }, [startSSOFlow, isGoogleLoading, isSigningUp, isVerifying]);
+  }, [startSSOFlow, isGoogleLoading, isSigningUp, isVerifying, posthog]);
 
   const isPendingVerification = Boolean(
     signUp?.status === "missing_requirements" &&
