@@ -14,6 +14,7 @@ import {
   View,
 } from "react-native";
 import Toast from "react-native-toast-message";
+import { usePostHog } from "posthog-react-native";
 
 const CATEGORIES = [
   "Entertainment",
@@ -54,6 +55,20 @@ export default function CreateSubscriptionModal({
   const [frequency, setFrequency] = useState<"monthly" | "yearly">("monthly");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const posthog = usePostHog();
+
+  const resetForm = () => {
+    setName("");
+    setPrice("");
+    setFrequency("monthly");
+    setSelectedCategory(null);
+  };
+
+  const handleClose = () => {
+    if (isSubmitting) return;
+    resetForm();
+    onClose();
+  };
 
   const isFormValid =
     name.trim() !== "" &&
@@ -97,11 +112,15 @@ export default function CreateSubscriptionModal({
 
       onSubscriptionCreated(newSubscription);
 
+      posthog.capture("subscription_created", {
+        subscription_name: name.trim(),
+        subscription_price: price,
+        subscription_frequency: frequency,
+        subscription_category: selectedCategory,
+      });
+
       // Reset form
-      setName("");
-      setPrice("");
-      setFrequency("monthly");
-      setSelectedCategory(null);
+      resetForm();
 
       // Close modal
       onClose();
@@ -132,7 +151,7 @@ export default function CreateSubscriptionModal({
       visible={visible}
       animationType="slide"
       transparent
-      onRequestClose={onClose}
+      onRequestClose={handleClose}
     >
       <View
         className="flex-1"
@@ -142,7 +161,7 @@ export default function CreateSubscriptionModal({
           behavior={Platform.OS === "ios" ? "padding" : "height"}
           style={{ flex: 1 }}
         >
-          <Pressable className="flex-1" onPress={onClose} hitSlop={0} />
+          <Pressable className="flex-1" onPress={handleClose} hitSlop={0} />
           <View
             className="mt-auto max-h-[85%] rounded-t-[24px]"
             style={{ backgroundColor: theme.background }}
@@ -160,7 +179,7 @@ export default function CreateSubscriptionModal({
               <TouchableOpacity
                 className="w-8 h-8 rounded-full items-center justify-center"
                 style={{ backgroundColor: theme.surfaceFill }}
-                onPress={onClose}
+                onPress={handleClose}
                 hitSlop={8}
               >
                 <Text

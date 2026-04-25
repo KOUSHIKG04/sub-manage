@@ -9,7 +9,7 @@ import { useTheme } from "@/src/theme/useTheme";
 import { useSubscriptionStore } from "@/src/stores/subscription-store";
 import { Ionicons } from "@expo/vector-icons";
 import dayjs from "dayjs";
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import {
   FlatList,
   Image,
@@ -38,6 +38,17 @@ export default function Home() {
   const { user } = useUser();
 
   const insets = useSafeAreaInsets();
+
+//   const upcomingSubscriptions = useMemo(
+//    () =>
+//      [...subscriptions]
+//        .filter((subscription) => subscription.renewalDate)
+//        .sort(
+//          (a, b) =>
+//            dayjs(a.renewalDate).valueOf() - dayjs(b.renewalDate).valueOf(),
+//        ),
+//    [subscriptions],
+//  );
 
   const handleSubscriptionCreated = useCallback(
     (newSubscription: Subscription) => {
