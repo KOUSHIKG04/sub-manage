@@ -9,8 +9,9 @@ import {
 } from "@clerk/expo";
 import { Ionicons } from "@expo/vector-icons";
 import * as Linking from "expo-linking";
-import { Link, useRouter } from "expo-router";
+import { Link } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
+import { usePostHog } from "posthog-react-native";
 import React, { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
@@ -29,6 +30,7 @@ export default function SignUp() {
   const { signUp } = useSignUp();
   const { startSSOFlow } = useSSO();
   const { theme } = useTheme();
+  const posthog = usePostHog();
 
   const [emailAddress, setEmailAddress] = useState("");
   const [password, setPassword] = useState("");
@@ -68,20 +70,23 @@ export default function SignUp() {
 
       if (res?.error) {
         //@ts-ignore
-        showErrorToast(res.error.errors?.[0]?.message || "An error occurred.");
+        const errorCode = res.error.errors?.[0]?.code || "unknown_error";
+        posthog.capture("sign_up_failed", { method: "email", reason: errorCode });
+        showErrorToast("Sign up failed. Please check your details and try again.");
         setIsSigningUp(false);
         return;
       }
 
       await signUp?.verifications.sendEmailCode();
+      posthog.capture("sign_up_email_verification_sent", { method: "email" });
 
       setIsSigningUp(false);
     } catch (err: any) {
-      if (isClerkAPIResponseError(err)) {
-        showErrorToast(err.errors[0]?.message || "An error occurred.");
-      } else {
-        showErrorToast(err.message || "An unexpected error occurred.");
-      }
+      const errorCode = isClerkAPIResponseError(err)
+        ? err.errors[0]?.code || "unknown_error"
+        : "internal_error";
+      posthog.capture("sign_up_failed", { method: "email", reason: errorCode });
+      showErrorToast("Sign up failed. Please check your details and try again.");
       setIsSigningUp(false);
     }
   };
@@ -97,16 +102,13 @@ export default function SignUp() {
 
       if (res?.error) {
         const clerkError = res.error;
-        let message =
-          // @ts-ignore
-          clerkError.errors?.[0]?.longMessage || clerkError.errors?.[0]?.message ||
-          "Invalid verification code";
-
-        const lowerMsg = message.toLowerCase();
-
-        if (lowerMsg.includes("code")) {
+        // @ts-ignore
+        const errorCode = clerkError.errors?.[0]?.code || "";
+        
+        let message = "Verification failed. Please try again.";
+        if (errorCode === "form_code_incorrect" || errorCode === "verification_failed") {
           message = "Invalid or expired code";
-        } else if (lowerMsg.includes("too many")) {
+        } else if (errorCode.includes("rate") || errorCode.includes("too_many")) {
           message = "Too many attempts. Try again later";
         }
 
@@ -118,6 +120,7 @@ export default function SignUp() {
       if (signUp?.status === "complete") {
         setIsNavigating(true);
         await signUp.finalize();
+        posthog.capture("signed_up", { method: "email" });
         showSuccessToast("Account created successfully!");
         return;
       }
@@ -133,6 +136,7 @@ export default function SignUp() {
       setIsVerifying(false);
     } catch (err) {
       console.log("UNEXPECTED VERIFY ERROR:", err);
+      posthog.capture("sign_up_failed", { method: "email", reason: "internal_error" });
       showErrorToast("Something went wrong");
       setIsNavigating(false);
       setIsVerifying(false);
@@ -150,11 +154,7 @@ export default function SignUp() {
       // Optionally, you can set a success message here or start a cooldown timer
       setIsResending(false);
     } catch (err: any) {
-      if (isClerkAPIResponseError(err)) {
-        showErrorToast(err.errors[0]?.message || "An error occurred.");
-      } else {
-        showErrorToast(err.message || "An unexpected error occurred.");
-      }
+      showErrorToast("Failed to resend code. Please try again later.");
       setIsResending(false);
     }
   };
@@ -175,17 +175,19 @@ export default function SignUp() {
       if (createdSessionId && setActive) {
         setIsNavigating(true);
         await setActive({ session: createdSessionId });
+        posthog.capture("signed_up", { method: "google" });
         // router.replace("/(tabs)");
         return;
       }
 
       setIsGoogleLoading(false);
     } catch (err) {
+      posthog.capture("sign_up_failed", { method: "google", reason: "sso_error" });
       showErrorToast("Google sign-up failed. Please try again.");
       setIsNavigating(false);
       setIsGoogleLoading(false);
     }
-  }, [startSSOFlow, isGoogleLoading, isSigningUp, isVerifying]);
+  }, [startSSOFlow, isGoogleLoading, isSigningUp, isVerifying, posthog]);
 
   const isPendingVerification = Boolean(
     signUp?.status === "missing_requirements" &&

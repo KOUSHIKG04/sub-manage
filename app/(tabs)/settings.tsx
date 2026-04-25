@@ -4,33 +4,23 @@ import { showErrorToast } from "@/src/lib/utils";
 import { useTheme } from "@/src/theme/useTheme";
 import { useClerk, useUser } from "@clerk/expo";
 import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
+import { usePostHog } from "posthog-react-native";
 import React, { useState } from "react";
 import { Image, Pressable, ScrollView, Switch, Text, View } from "react-native";
 
-export default function Settings() {
-  const { theme, isDark, setMode, mode } = useTheme();
-  const { user } = useUser();
-  const { signOut } = useClerk();
-  const router = useRouter();
-  const [showSignOutModal, setShowSignOutModal] = useState(false);
+type SettingItemProps = {
+  icon: keyof typeof Ionicons.glyphMap;
+  label: string;
+  value?: string;
+  onPress?: () => void;
+  showChevron?: boolean;
+  destructive?: boolean;
+  rightElement?: React.ReactNode;
+  theme: any;
+};
 
-  const handleSignOut = async () => {
-    try {
-      setShowSignOutModal(false);
-      await signOut();
-      // router.replace("/(auth)/sign-in");
-    } catch (err) {
-      showErrorToast("Failed to sign out. Please try again.");
-    }
-  };
-
-  const toggleTheme = () => {
-    if (mode === "system") return;
-    setMode(isDark ? "light" : "dark");
-  };
-
-  const SettingItem = ({
+const SettingItem = React.memo(
+  ({
     icon,
     label,
     value,
@@ -38,15 +28,8 @@ export default function Settings() {
     showChevron = true,
     destructive = false,
     rightElement,
-  }: {
-    icon: keyof typeof Ionicons.glyphMap;
-    label: string;
-    value?: string;
-    onPress?: () => void;
-    showChevron?: boolean;
-    destructive?: boolean;
-    rightElement?: React.ReactNode;
-  }) => (
+    theme,
+  }: SettingItemProps) => (
     <Pressable
       onPress={onPress}
       className="flex-row items-center rounded-[20px] py-4 px-4 mb-4"
@@ -93,6 +76,51 @@ export default function Settings() {
         <Ionicons name="chevron-forward" size={20} color={theme.stroke} />
       )}
     </Pressable>
+  ),
+);
+
+export default function Settings() {
+  const { theme, isDark, setMode, mode } = useTheme();
+  const { user } = useUser();
+  const { signOut } = useClerk();
+  const posthog = usePostHog();
+
+  const [showSignOutModal, setShowSignOutModal] = useState(false);
+
+  const handleSignOut = async () => {
+    try {
+      setShowSignOutModal(false);
+      posthog.capture("signed_out");
+      await posthog.flush();
+      await signOut();
+    } catch (err) {
+      showErrorToast("Failed to sign out. Please try again.");
+    }
+  };
+
+  const toggleTheme = () => {
+    if (mode === "system") return;
+    setMode(isDark ? "light" : "dark");
+  };
+
+  const handleSignOutPress = React.useCallback(() => {
+    setShowSignOutModal(true);
+  }, []);
+
+  const noop = React.useCallback(() => {}, []);
+
+  const themeSwitchElement = React.useMemo(
+    () => (
+      <Switch
+        value={mode === "system"}
+        onValueChange={(val) =>
+          setMode(val ? "system" : isDark ? "dark" : "light")
+        }
+        trackColor={{ false: theme.stroke, true: theme.accent }}
+        thumbColor="#fff"
+      />
+    ),
+    [mode, isDark, theme.stroke, theme.accent, setMode],
   );
 
   return (
@@ -185,16 +213,8 @@ export default function Settings() {
             icon="laptop-outline"
             label="System Theme"
             showChevron={false}
-            rightElement={
-              <Switch
-                value={mode === "system"}
-                onValueChange={(val) =>
-                  setMode(val ? "system" : isDark ? "dark" : "light")
-                }
-                trackColor={{ false: theme.stroke, true: theme.accent }}
-                thumbColor="#fff"
-              />
-            }
+            theme={theme}
+            rightElement={themeSwitchElement}
           />
         </View>
 
@@ -209,13 +229,15 @@ export default function Settings() {
           <SettingItem
             icon="person-outline"
             label="Edit Profile"
-            onPress={() => {}}
+            onPress={noop}
+            theme={theme}
           />
 
           <SettingItem
             icon="notifications-outline"
             label="Notifications"
-            onPress={() => {}}
+            onPress={noop}
+            theme={theme}
           />
 
           <SettingItem
@@ -223,7 +245,8 @@ export default function Settings() {
             label="Sign Out"
             destructive
             showChevron={false}
-            onPress={() => setShowSignOutModal(true)}
+            onPress={handleSignOutPress}
+            theme={theme}
           />
         </View>
 
@@ -238,13 +261,15 @@ export default function Settings() {
           <SettingItem
             icon="help-circle-outline"
             label="Help & Support"
-            onPress={() => {}}
+            onPress={noop}
+            theme={theme}
           />
 
           <SettingItem
             icon="information-circle-outline"
             label="About"
-            onPress={() => {}}
+            onPress={noop}
+            theme={theme}
           />
         </View>
       </ScrollView>

@@ -6,6 +6,7 @@ import { Ionicons } from "@expo/vector-icons";
 import * as Linking from "expo-linking";
 import { Link, useRouter } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
+import { usePostHog } from "posthog-react-native";
 import React, { useCallback, useEffect, useState } from "react";
 
 import {
@@ -27,6 +28,7 @@ export default function SignIn() {
   const { startSSOFlow } = useSSO();
   const router = useRouter();
   const { theme } = useTheme();
+  const posthog = usePostHog();
 
   const [emailAddress, setEmailAddress] = useState("");
   const [password, setPassword] = useState("");
@@ -75,6 +77,12 @@ export default function SignIn() {
           message = "Too many attempts. Try again later";
         }
 
+        posthog.capture("sign_in_failed", {
+          method: "email",
+          reason: message,
+          email: emailAddress,
+        });
+        // posthog.capture("sign_in_failed", { method: "email", reason: message, email: emailAddress });
         showErrorToast(message);
         setIsSigningIn(false);
         return;
@@ -83,6 +91,7 @@ export default function SignIn() {
       if (signIn?.status === "complete") {
         setIsNavigating(true);
         await signIn.finalize();
+        posthog.capture("signed_in", { method: "email", email: emailAddress });
         showSuccessToast("Signed in successfully!");
         return;
       }
@@ -92,6 +101,11 @@ export default function SignIn() {
       setIsSigningIn(false);
     } catch (err) {
       console.log("UNEXPECTED ERROR:", err);
+      posthog.capture("sign_in_failed", {
+        method: "email",
+        reason: "unexpected_error",
+        email: emailAddress,
+      });
       showErrorToast("Something went wrong");
       setIsNavigating(false);
       setIsSigningIn(false);
@@ -114,17 +128,22 @@ export default function SignIn() {
       if (createdSessionId && setActive) {
         setIsNavigating(true);
         await setActive({ session: createdSessionId });
+        posthog.capture("signed_in", { method: "google" });
         // router.replace("/(tabs)");
         return;
       }
 
       setIsGoogleLoading(false);
     } catch (err) {
+      posthog.capture("sign_in_failed", {
+        method: "google",
+        reason: "sso_error",
+      });
       showErrorToast("Google sign-in failed. Please try again.");
       setIsNavigating(false);
       setIsGoogleLoading(false);
     }
-  }, [startSSOFlow, router, isGoogleLoading, isSigningIn]);
+  }, [startSSOFlow, isGoogleLoading, isSigningIn, setActive, posthog]);
 
   const isAnyLoading =
     isSigningIn || isGoogleLoading || isNavigating || !signIn;
