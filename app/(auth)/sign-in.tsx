@@ -79,8 +79,8 @@ export default function SignIn() {
 
         posthog.capture("sign_in_failed", {
           method: "email",
-          reason: message,
-          email: emailAddress,
+          reason: lowerMsg,
+          // email: emailAddress,
         });
         // posthog.capture("sign_in_failed", { method: "email", reason: message, email: emailAddress });
         showErrorToast(message);
@@ -91,7 +91,10 @@ export default function SignIn() {
       if (signIn?.status === "complete") {
         setIsNavigating(true);
         await signIn.finalize();
-        posthog.capture("signed_in", { method: "email", email: emailAddress });
+        posthog.capture("signed_in", 
+          { method: "email",
+          //  email: emailAddress
+           });
         showSuccessToast("Signed in successfully!");
         return;
       }

@@ -31,10 +31,16 @@ export default function Subscription() {
   );
 
   const filteredSubscriptions = useMemo(() => {
+    const normalizedQuery = searchQuery.trim().toLowerCase();
+
+    if (!normalizedQuery) {
+      return subscriptions;
+    }
+
     return subscriptions.filter(
       (sub) =>
-        sub.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        sub.category?.toLowerCase().includes(searchQuery.toLowerCase()),
+        sub.name.toLowerCase().includes(normalizedQuery) ||
+        sub.category?.toLowerCase().includes(normalizedQuery),
     );
   }, [searchQuery, subscriptions]);
 

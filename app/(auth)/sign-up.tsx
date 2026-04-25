@@ -106,9 +106,15 @@ export default function SignUp() {
         const errorCode = clerkError.errors?.[0]?.code || "";
         
         let message = "Verification failed. Please try again.";
-        if (errorCode === "form_code_incorrect" || errorCode === "verification_failed") {
+        if (
+          errorCode === "form_code_incorrect" ||
+          errorCode === "verification_failed"
+        ) {
           message = "Invalid or expired code";
-        } else if (errorCode.includes("rate") || errorCode.includes("too_many")) {
+        } else if (
+          errorCode.includes("rate") ||
+          errorCode.includes("too_many")
+        ) {
           message = "Too many attempts. Try again later";
         }
 
