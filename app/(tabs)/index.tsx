@@ -3,10 +3,7 @@ import ListHeading from "@/src/components/ListHeading";
 import Screen from "@/src/components/Screen";
 import SubscriptionCard from "@/src/components/SubscriptionCard";
 import UpcomingSubscriptionCard from "@/src/components/UpCommingSub";
-import {
-  HOME_BALANCE,
-  UPCOMING_SUBSCRIPTIONS,
-} from "@/src/constants/data";
+import { HOME_BALANCE, UPCOMING_SUBSCRIPTIONS } from "@/src/constants/data";
 import { formatCurrency } from "@/src/lib/utils";
 import { useTheme } from "@/src/theme/useTheme";
 import { useSubscriptionStore } from "@/src/stores/subscription-store";
@@ -24,6 +21,8 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useUser } from "@clerk/expo";
+
+const ItemSeparator = () => <View className="h-4" />;
 
 export default function Home() {
   const { theme } = useTheme();
@@ -46,8 +45,6 @@ export default function Home() {
     },
     [addSubscription],
   );
-
-  const ItemSeparator = () => <View className="h-4" />;
 
   const renderHeader = useCallback(
     () => (
@@ -145,7 +142,7 @@ export default function Home() {
         />
       </>
     ),
-    [theme],
+    [theme, user],
   );
 
   const onRefresh = async () => {

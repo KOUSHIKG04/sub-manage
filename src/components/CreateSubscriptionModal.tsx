@@ -56,10 +56,13 @@ export default function CreateSubscriptionModal({
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const isFormValid =
-    name.trim() !== "" && price !== "" && parseFloat(price) > 0;
+    name.trim() !== "" &&
+    price !== "" &&
+    parseFloat(price) > 0 &&
+    selectedCategory !== null;
 
   const handleSubmit = async () => {
-    if (!isFormValid || !selectedCategory) {
+    if (!isFormValid) {
       Toast.show({
         type: "error",
         text1: "Invalid Input",
@@ -78,7 +81,7 @@ export default function CreateSubscriptionModal({
           : startDate.add(1, "year");
 
       const newSubscription: Subscription = {
-        id: `subscription-${Date.now()}`,
+        id: `subscription-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
         name: name.trim(),
         price: parseFloat(price),
         frequency,
@@ -113,6 +116,17 @@ export default function CreateSubscriptionModal({
     }
   };
 
+  const handlePriceChange = (text: string) => {
+    const sanitized = text.replace(/[^0-9.]/g, "");
+
+    const parts = sanitized.split(".");
+    if (parts.length > 2) {
+      setPrice(parts[0] + "." + parts.slice(1).join(""));
+    } else {
+      setPrice(sanitized);
+    }
+  };
+
   return (
     <Modal
       visible={visible}
@@ -120,7 +134,10 @@ export default function CreateSubscriptionModal({
       transparent
       onRequestClose={onClose}
     >
-      <View className="flex-1" style={{ backgroundColor: "rgba(0, 0, 0, 0.5)" }}>
+      <View
+        className="flex-1"
+        style={{ backgroundColor: "rgba(0, 0, 0, 0.5)" }}
+      >
         <KeyboardAvoidingView
           behavior={Platform.OS === "ios" ? "padding" : "height"}
           style={{ flex: 1 }}
@@ -130,15 +147,28 @@ export default function CreateSubscriptionModal({
             className="mt-auto max-h-[85%] rounded-t-[24px]"
             style={{ backgroundColor: theme.background }}
           >
-            <View className="flex-row items-center justify-between px-5 py-4 border-b-[0.7px]" style={{ borderColor: theme.stroke }}>
-              <Text className="text-xl font-poppins-bold" style={{ color: theme.text }}>New Subscription</Text>
+            <View
+              className="flex-row items-center justify-between px-5 py-4 border-b-[0.7px]"
+              style={{ borderColor: theme.stroke }}
+            >
+              <Text
+                className="text-xl font-poppins-bold"
+                style={{ color: theme.text }}
+              >
+                New Subscription
+              </Text>
               <TouchableOpacity
                 className="w-8 h-8 rounded-full items-center justify-center"
                 style={{ backgroundColor: theme.surfaceFill }}
                 onPress={onClose}
                 hitSlop={8}
               >
-                <Text className="text-xs font-poppins-bold" style={{ color: theme.text }}>✕</Text>
+                <Text
+                  className="text-xs font-poppins-bold"
+                  style={{ color: theme.text }}
+                >
+                  ✕
+                </Text>
               </TouchableOpacity>
             </View>
 
@@ -149,7 +179,12 @@ export default function CreateSubscriptionModal({
             >
               <View className="gap-5 p-5">
                 <View className="gap-2">
-                  <Text className="text-sm font-poppins-bold" style={{ color: theme.text }}>Subscription Name</Text>
+                  <Text
+                    className="text-sm font-poppins-bold"
+                    style={{ color: theme.text }}
+                  >
+                    Subscription Name
+                  </Text>
                   <TextInput
                     className="rounded-[16px] border px-4 py-4 text-base font-poppins"
                     style={{
@@ -166,7 +201,12 @@ export default function CreateSubscriptionModal({
                 </View>
 
                 <View className="gap-2">
-                  <Text className="text-sm font-poppins-bold" style={{ color: theme.text }}>Price</Text>
+                  <Text
+                    className="text-sm font-poppins-bold"
+                    style={{ color: theme.text }}
+                  >
+                    Price
+                  </Text>
                   <TextInput
                     className="rounded-[16px] border px-4 py-4 text-base font-poppins"
                     style={{
@@ -177,28 +217,38 @@ export default function CreateSubscriptionModal({
                     placeholder="0.00"
                     placeholderTextColor={theme.text}
                     value={price}
-                    onChangeText={setPrice}
+                    onChangeText={handlePriceChange}
                     keyboardType="decimal-pad"
                     editable={!isSubmitting}
                   />
                 </View>
 
                 <View className="gap-2">
-                  <Text className="text-sm font-poppins-bold" style={{ color: theme.text }}>Billing Frequency</Text>
+                  <Text
+                    className="text-sm font-poppins-bold"
+                    style={{ color: theme.text }}
+                  >
+                    Billing Frequency
+                  </Text>
                   <View className="flex-row gap-3">
                     <TouchableOpacity
                       onPress={() => setFrequency("monthly")}
                       disabled={isSubmitting}
                       className="flex-1 items-center rounded-[16px] border py-3"
                       style={{
-                        borderColor: frequency === "monthly" ? theme.accent : theme.stroke,
-                        backgroundColor: frequency === "monthly" ? `${theme.accent}15` : theme.surfaceFill,
+                        borderColor:
+                          frequency === "monthly" ? theme.accent : theme.stroke,
+                        backgroundColor:
+                          frequency === "monthly"
+                            ? `${theme.accent}15`
+                            : theme.surfaceFill,
                       }}
                     >
                       <Text
-                        className={`text-sm ${frequency === "monthly" ? 'font-poppins-bold' : 'font-poppins'}`}
+                        className={`text-sm ${frequency === "monthly" ? "font-poppins-bold" : "font-poppins"}`}
                         style={{
-                          color: frequency === "monthly" ? theme.accent : theme.text,
+                          color:
+                            frequency === "monthly" ? theme.accent : theme.text,
                         }}
                       >
                         Monthly
@@ -210,14 +260,19 @@ export default function CreateSubscriptionModal({
                       disabled={isSubmitting}
                       className="flex-1 items-center rounded-[16px] border py-3"
                       style={{
-                        borderColor: frequency === "yearly" ? theme.accent : theme.stroke,
-                        backgroundColor: frequency === "yearly" ? `${theme.accent}15` : theme.surfaceFill,
+                        borderColor:
+                          frequency === "yearly" ? theme.accent : theme.stroke,
+                        backgroundColor:
+                          frequency === "yearly"
+                            ? `${theme.accent}15`
+                            : theme.surfaceFill,
                       }}
                     >
                       <Text
-                        className={`text-sm ${frequency === "yearly" ? 'font-poppins-bold' : 'font-poppins'}`}
+                        className={`text-sm ${frequency === "yearly" ? "font-poppins-bold" : "font-poppins"}`}
                         style={{
-                          color: frequency === "yearly" ? theme.accent : theme.text,
+                          color:
+                            frequency === "yearly" ? theme.accent : theme.text,
                         }}
                       >
                         Yearly
@@ -227,7 +282,12 @@ export default function CreateSubscriptionModal({
                 </View>
 
                 <View className="gap-2">
-                  <Text className="text-sm font-poppins-bold" style={{ color: theme.text }}>Category</Text>
+                  <Text
+                    className="text-sm font-poppins-bold"
+                    style={{ color: theme.text }}
+                  >
+                    Category
+                  </Text>
                   <View className="flex-row flex-wrap gap-2">
                     {CATEGORIES.map((category) => (
                       <TouchableOpacity
@@ -236,14 +296,23 @@ export default function CreateSubscriptionModal({
                         disabled={isSubmitting}
                         className="rounded-[20px] border px-4 py-2"
                         style={{
-                          borderColor: selectedCategory === category ? theme.accent : theme.stroke,
-                          backgroundColor: selectedCategory === category ? `${theme.accent}15` : theme.surfaceFill,
+                          borderColor:
+                            selectedCategory === category
+                              ? theme.accent
+                              : theme.stroke,
+                          backgroundColor:
+                            selectedCategory === category
+                              ? `${theme.accent}15`
+                              : theme.surfaceFill,
                         }}
                       >
                         <Text
-                          className={`text-sm ${selectedCategory === category ? 'font-poppins-bold' : 'font-poppins'}`}
+                          className={`text-sm ${selectedCategory === category ? "font-poppins-bold" : "font-poppins"}`}
                           style={{
-                            color: selectedCategory === category ? theme.accent : theme.text,
+                            color:
+                              selectedCategory === category
+                                ? theme.accent
+                                : theme.text,
                           }}
                         >
                           {category}
@@ -258,10 +327,16 @@ export default function CreateSubscriptionModal({
                   disabled={!isFormValid || !selectedCategory || isSubmitting}
                   className="mt-6 items-center rounded-[16px] py-4"
                   style={{
-                    backgroundColor: (!isFormValid || !selectedCategory || isSubmitting) ? `${theme.accent}72` : theme.accent,
+                    backgroundColor:
+                      !isFormValid || !selectedCategory || isSubmitting
+                        ? `${theme.accent}72`
+                        : theme.accent,
                   }}
                 >
-                  <Text className="text-base font-poppins-bold" style={{ color: theme.text }}>
+                  <Text
+                    className="text-base font-poppins-bold"
+                    style={{ color: theme.text }}
+                  >
                     {isSubmitting ? "Creating..." : "Create Subscription"}
                   </Text>
                 </TouchableOpacity>

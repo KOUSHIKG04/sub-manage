@@ -76,7 +76,7 @@ const SettingItem = React.memo(
         <Ionicons name="chevron-forward" size={20} color={theme.stroke} />
       )}
     </Pressable>
-  )
+  ),
 );
 
 export default function Settings() {
@@ -91,6 +91,7 @@ export default function Settings() {
     try {
       setShowSignOutModal(false);
       posthog.capture("signed_out");
+      await posthog.flush();
       await signOut();
     } catch (err) {
       showErrorToast("Failed to sign out. Please try again.");
@@ -102,23 +103,25 @@ export default function Settings() {
     setMode(isDark ? "light" : "dark");
   };
 
-
   const handleSignOutPress = React.useCallback(() => {
     setShowSignOutModal(true);
   }, []);
 
   const noop = React.useCallback(() => {}, []);
 
-  const themeSwitchElement = React.useMemo(() => (
-    <Switch
-      value={mode === "system"}
-      onValueChange={(val) =>
-        setMode(val ? "system" : isDark ? "dark" : "light")
-      }
-      trackColor={{ false: theme.stroke, true: theme.accent }}
-      thumbColor="#fff"
-    />
-  ), [mode, isDark, theme.stroke, theme.accent, setMode]);
+  const themeSwitchElement = React.useMemo(
+    () => (
+      <Switch
+        value={mode === "system"}
+        onValueChange={(val) =>
+          setMode(val ? "system" : isDark ? "dark" : "light")
+        }
+        trackColor={{ false: theme.stroke, true: theme.accent }}
+        thumbColor="#fff"
+      />
+    ),
+    [mode, isDark, theme.stroke, theme.accent, setMode],
+  );
 
   return (
     <Screen className="px-6">

@@ -70,23 +70,23 @@ export default function SignUp() {
 
       if (res?.error) {
         //@ts-ignore
-        const errMsg = res.error.errors?.[0]?.message || "An error occurred.";
-        posthog.capture("sign_up_failed", { method: "email", reason: errMsg, email: emailAddress });
-        showErrorToast(errMsg);
+        const errorCode = res.error.errors?.[0]?.code || "unknown_error";
+        posthog.capture("sign_up_failed", { method: "email", reason: errorCode });
+        showErrorToast("Sign up failed. Please check your details and try again.");
         setIsSigningUp(false);
         return;
       }
 
       await signUp?.verifications.sendEmailCode();
-      posthog.capture("sign_up_email_verification_sent", { email: emailAddress });
+      posthog.capture("sign_up_email_verification_sent", { method: "email" });
 
       setIsSigningUp(false);
     } catch (err: any) {
-      const errMsg = isClerkAPIResponseError(err)
-        ? err.errors[0]?.message || "An error occurred."
-        : err.message || "An unexpected error occurred.";
-      posthog.capture("sign_up_failed", { method: "email", reason: errMsg, email: emailAddress });
-      showErrorToast(errMsg);
+      const errorCode = isClerkAPIResponseError(err)
+        ? err.errors[0]?.code || "unknown_error"
+        : "internal_error";
+      posthog.capture("sign_up_failed", { method: "email", reason: errorCode });
+      showErrorToast("Sign up failed. Please check your details and try again.");
       setIsSigningUp(false);
     }
   };
@@ -102,16 +102,13 @@ export default function SignUp() {
 
       if (res?.error) {
         const clerkError = res.error;
-        let message =
-          // @ts-ignore
-          clerkError.errors?.[0]?.longMessage || clerkError.errors?.[0]?.message ||
-          "Invalid verification code";
-
-        const lowerMsg = message.toLowerCase();
-
-        if (lowerMsg.includes("code")) {
+        // @ts-ignore
+        const errorCode = clerkError.errors?.[0]?.code || "";
+        
+        let message = "Verification failed. Please try again.";
+        if (errorCode === "form_code_incorrect" || errorCode === "verification_failed") {
           message = "Invalid or expired code";
-        } else if (lowerMsg.includes("too many")) {
+        } else if (errorCode.includes("rate") || errorCode.includes("too_many")) {
           message = "Too many attempts. Try again later";
         }
 
@@ -123,7 +120,7 @@ export default function SignUp() {
       if (signUp?.status === "complete") {
         setIsNavigating(true);
         await signUp.finalize();
-        posthog.capture("signed_up", { method: "email", email: emailAddress });
+        posthog.capture("signed_up", { method: "email" });
         showSuccessToast("Account created successfully!");
         return;
       }
@@ -139,7 +136,7 @@ export default function SignUp() {
       setIsVerifying(false);
     } catch (err) {
       console.log("UNEXPECTED VERIFY ERROR:", err);
-      posthog.capture("sign_up_failed", { method: "email", reason: "unexpected_error", email: emailAddress });
+      posthog.capture("sign_up_failed", { method: "email", reason: "internal_error" });
       showErrorToast("Something went wrong");
       setIsNavigating(false);
       setIsVerifying(false);
@@ -157,11 +154,7 @@ export default function SignUp() {
       // Optionally, you can set a success message here or start a cooldown timer
       setIsResending(false);
     } catch (err: any) {
-      if (isClerkAPIResponseError(err)) {
-        showErrorToast(err.errors[0]?.message || "An error occurred.");
-      } else {
-        showErrorToast(err.message || "An unexpected error occurred.");
-      }
+      showErrorToast("Failed to resend code. Please try again later.");
       setIsResending(false);
     }
   };

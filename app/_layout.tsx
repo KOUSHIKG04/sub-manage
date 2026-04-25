@@ -5,19 +5,23 @@ import { useTheme } from "@/src/theme/useTheme";
 import { ClerkProvider, useAuth, useUser } from "@clerk/expo";
 import { tokenCache } from "@clerk/expo/token-cache";
 import { useFonts } from "expo-font";
-import { Stack, useRouter, useSegments, usePathname } from "expo-router";
+import { Stack, usePathname, useRouter, useSegments } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
+import { PostHogProvider, usePostHog } from "posthog-react-native";
 import { useEffect, useMemo } from "react";
 import { View } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import { PostHogProvider, usePostHog } from "posthog-react-native";
 
 void SplashScreen.preventAutoHideAsync().catch(() => {});
 
 const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY!;
-
 if (!publishableKey) {
   throw new Error("Add your Clerk Publishable Key to the .env file");
+}
+
+const posthogKey = process.env.EXPO_PUBLIC_POSTHOG_KEY;
+if (!posthogKey) {
+  throw new Error("Add your PostHog API Key to the .env file");
 }
 
 const FONTS = {
@@ -50,16 +54,22 @@ function InitialLayout() {
   useEffect(() => {
     if (!isLoaded) return;
     if (isSignedIn && userId) {
+      const hasAnalyticsConsent = false; // TODO: Implement actual consent mechanism
       const userProps: Record<string, string> = {};
-      
-      if (user?.primaryEmailAddress?.emailAddress) {
-        userProps.email = user.primaryEmailAddress.emailAddress;
+
+      if (hasAnalyticsConsent) {
+        if (user?.primaryEmailAddress?.emailAddress) {
+          userProps.email = user.primaryEmailAddress.emailAddress;
+        }
+        if (user?.fullName || user?.username) {
+          userProps.name = (user.fullName || user.username) as string;
+        }
       }
-      if (user?.fullName || user?.username) {
-        userProps.name = (user.fullName || user.username) as string;
-      }
-      
-      posthog.identify(userId, Object.keys(userProps).length > 0 ? userProps : undefined);
+
+      posthog.identify(
+        userId,
+        Object.keys(userProps).length > 0 ? userProps : undefined,
+      );
     } else if (!isSignedIn) {
       posthog.reset();
     }
@@ -76,7 +86,8 @@ function InitialLayout() {
   useEffect(() => {
     if (!isLoaded || !fontsLoaded) return;
 
-    const inAuthGroup = segments[0] === "(auth)"; const inSSOCallback = segments[0] === "sso-callback";
+    const inAuthGroup = segments[0] === "(auth)";
+    const inSSOCallback = segments[0] === "sso-callback";
 
     if (isSignedIn && (inAuthGroup || inSSOCallback)) {
       // User just signed in but is still in auth/callback → go to home
@@ -86,6 +97,16 @@ function InitialLayout() {
       router.replace("/(auth)/sign-in");
     }
   }, [isSignedIn, isLoaded, fontsLoaded, segments, router]);
+
+
+   const screenOptions = useMemo(
+     () => ({
+       headerShown: false,
+       contentStyle: { backgroundColor: theme.background },
+       animation: "default" as const,
+     }),
+     [theme.background],
+   );
 
   if (fontError) throw fontError;
 
@@ -100,16 +121,6 @@ function InitialLayout() {
       </View>
     );
   }
-
-  // Memoize screen options to prevent Stack re-renders
-  const screenOptions = useMemo(
-    () => ({
-      headerShown: false,
-      contentStyle: { backgroundColor: theme.background },
-      animation: "default" as const,
-    }),
-    [theme.background]
-  );
 
   return (
     <View
@@ -127,7 +138,7 @@ function InitialLayout() {
 export default function RootLayout() {
   return (
     <PostHogProvider
-      apiKey={process.env.EXPO_PUBLIC_POSTHOG_KEY!}
+      apiKey={posthogKey}
       options={{ host: process.env.EXPO_PUBLIC_POSTHOG_HOST }}
     >
       <ClerkProvider publishableKey={publishableKey} tokenCache={tokenCache}>

@@ -8,6 +8,8 @@ import { useCallback, useMemo, useState } from "react";
 import { FlatList, Pressable, Text, TextInput, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+const ItemSeparator = () => <View className="h-4" />;
+
 export default function Subscription() {
   const { theme } = useTheme();
   const insets = useSafeAreaInsets();
@@ -35,8 +37,6 @@ export default function Subscription() {
         sub.category?.toLowerCase().includes(searchQuery.toLowerCase()),
     );
   }, [searchQuery, subscriptions]);
-
-  const ItemSeparator = () => <View className="h-4" />;
 
   const listHeader = (
     <View className="mb-6 mt-4">

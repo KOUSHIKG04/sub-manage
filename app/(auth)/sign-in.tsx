@@ -77,7 +77,12 @@ export default function SignIn() {
           message = "Too many attempts. Try again later";
         }
 
-        posthog.capture("sign_in_failed", { method: "email", reason: message, email: emailAddress });
+        posthog.capture("sign_in_failed", {
+          method: "email",
+          reason: message,
+          email: emailAddress,
+        });
+        // posthog.capture("sign_in_failed", { method: "email", reason: message, email: emailAddress });
         showErrorToast(message);
         setIsSigningIn(false);
         return;
@@ -96,7 +101,11 @@ export default function SignIn() {
       setIsSigningIn(false);
     } catch (err) {
       console.log("UNEXPECTED ERROR:", err);
-      posthog.capture("sign_in_failed", { method: "email", reason: "unexpected_error", email: emailAddress });
+      posthog.capture("sign_in_failed", {
+        method: "email",
+        reason: "unexpected_error",
+        email: emailAddress,
+      });
       showErrorToast("Something went wrong");
       setIsNavigating(false);
       setIsSigningIn(false);
@@ -126,7 +135,10 @@ export default function SignIn() {
 
       setIsGoogleLoading(false);
     } catch (err) {
-      posthog.capture("sign_in_failed", { method: "google", reason: "sso_error" });
+      posthog.capture("sign_in_failed", {
+        method: "google",
+        reason: "sso_error",
+      });
       showErrorToast("Google sign-in failed. Please try again.");
       setIsNavigating(false);
       setIsGoogleLoading(false);
